@@ -14,7 +14,7 @@ Maintainer: Steve Phillips, sjphilli@uwaterloo.ca**
 
 The ladybug_camera_driver package has been tested under [ROS] Kinetic and Ubuntu 16.04. 
 
-[![Build Status](https://travis-ci.com/sjphilli/ladybug.svg?token=xsJrkSdtugQUZAqp6xuh&branch=devel)](https://travis-ci.com/sjphilli/ladybug)
+[![Build Status](https://travis-ci.com/BEAMRobotics/ladybug_camera_driver.svg?token=xsJrkSdtugQUZAqp6xuh&branch=master)](https://travis-ci.com/BEAMRobotics/ladybug_camera_driver)
 
 ![Ladybug Camera](doc/ld5-family3.jpg)
 
