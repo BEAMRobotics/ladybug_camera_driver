@@ -1,0 +1,6 @@
+<library path="lib/libLadybugCameraNodelet">
+    <class name="ladybug_camera_driver/LadybugCameraNodelet" type="ladybug_camera_driver::LadybugCameraNodelet"
+           base_class_type="nodelet::Nodelet">
+        <description>This is the nodelet for the Point Grey Camera Driver.</description>
+    </class>
+</library>

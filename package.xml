@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>ladybug_camera_driver</name>
+    <version>1.0.0</version>
+    <description>Flir ladybug camera driver based on the Ladybug SDK.</description>
+    <maintainer email="sjphilli@uwaterloo.ca">Steve Phillips</maintainer>
+    <license>BSD</license>
+    <url type="website"></url>
+    <author>Steve Phillips</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <build_depend>curl</build_depend>  <!-- to get ca-certificates for downloading flycapture -->
+    <build_depend>dpkg</build_depend>  <!-- for unpacking flycapture debs -->
+
+    <depend>roslaunch</depend>
+    <depend>roscpp</depend>
+    <depend>nodelet</depend>
+    <depend>sensor_msgs</depend>
+    <depend>image_exposure_msgs</depend>
+    <depend>camera_info_manager</depend>
+    <depend>image_transport</depend>
+    <depend>dynamic_reconfigure</depend>
+    <depend>diagnostic_updater</depend>
+    <depend>pcl_ros</depend>
+    <depend>ladybug_msgs</depend>
+    <!-- Dependencies of libladybug -->
+    <depend>libusb-1.0-dev</depend>
+    <depend>libraw1394-dev</depend>
+    <depend>libdc1394-dev</depend>
+    <depend>opencv3</depend>
+
+    <exec_depend>image_proc</exec_depend>
+    <exec_depend>stereo_image_proc</exec_depend>
+
+    <test_depend>roslaunch</test_depend>
+
+
+    <export>
+        <nodelet plugin="${prefix}/nodelet_plugins.xml"/>
+    </export>
+</package>
