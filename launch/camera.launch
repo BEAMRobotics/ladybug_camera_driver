@@ -22,6 +22,6 @@
         <param name="debayering_method_name" value="DC1394_BAYER_METHOD_DOWNSAMPLE"/>
     </node>
 
-    <!--<node name="image_throttler" type="throttle" pkg="topic_tools" args="messages /image_tiles 1 /image_tiles/throttled" />-->
+    <node name="image_throttler" type="throttle" pkg="topic_tools" args="messages /image_tiles 0.1 /image_tiles/throttled" />
 
 </launch>
