@@ -23,5 +23,9 @@
     </node>
 
     <!--<node name="image_throttler" type="throttle" pkg="topic_tools" args="messages /image_tiles 1 /image_tiles/throttled" />-->
+    <node name="image_throttler" type="throttle" pkg="topic_tools" args="messages /ladybug/camera_0/image_colored 0.5 /ladybug/camera_0/image_colored_throttled" />
+    <node name="camera_3_throttle" type="throttle" pkg="topic_tools" args="messages /ladybug/camera_3/image_colored 0.5 /ladybug/camera_3/image_colored_throttled" />
+    <node name="camera_4_throttle" type="throttle" pkg="topic_tools" args="messages /ladybug/camera_4/image_colored 0.5 /ladybug/camera_4/image_colored_throttled" />
+    <node name="camera_3_raw_throttle" type="throttle" pkg="topic_tools" args="messages /ladybug/camera_3/image_raw 0.25 /ladybug/camera_3/image_raw_throttled" />
 
 </launch>

@@ -19,6 +19,8 @@
 #include <ladybug/ladybugstream.h>
 #include <ladybug/ladybuggeom.h>
 #include <ladybug/ladybugrenderer.h>
+// OpenCV
+#include <opencv2/core/core.hpp>
 
 class LadybugCamera {
  public:
