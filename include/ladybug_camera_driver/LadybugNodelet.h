@@ -4,7 +4,9 @@
 #include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
 
-#include "ladybug_camera_driver/LadybugCamera.h" // The actual standalone library for the Ladybug
+#include "ladybug_camera_driver/LadybugRectified.h" // The actual standalone library for the Ladybug
+#include "ladybug_camera_driver/LadybugRaw.h" // The actual standalone library for the Ladybug
+
 #include "ladybug_camera_driver/diagnostics.h"
 
 #include <image_transport/image_transport.h> // ROS library that allows sending compressed images
@@ -101,7 +103,6 @@ class LadybugCameraNodelet : public nodelet::Nodelet {
   // Needed to initialize and keep the dynamic_reconfigure::Server in scope.
   std::shared_ptr<dynamic_reconfigure::Server<ladybug_camera_driver::LadybugConfig> > reconfig_srv_;
 
-  LadybugCamera ladybug_; // Instance of the LadybugCamera wrapper class, used to interface with the camera.
 
   ros::Subscriber sub_; // Subscriber for gain and white balance changes.
 
@@ -123,6 +124,11 @@ class LadybugCameraNodelet : public nodelet::Nodelet {
   double diagnostics_max_acceptable_ = 0.01; // The maximum publishing delay (in seconds) before warning.
 
   ladybug_camera_driver::LadybugConfig config_; // Ladybug configuration file
+
+//  LadybugCamera ladybug_; // Instance of the LadybugCamera wrapper class, used to interface with the camera.
+
+//  LadybugInterface* ladybug_ = new LadybugRaw();
+    std::unique_ptr<LadybugInterface> ladybug_;
 };
 
 PLUGINLIB_EXPORT_CLASS(ladybug_camera_driver::LadybugCameraNodelet, nodelet::Nodelet)  // Needed for Nodelet declaration

@@ -1,18 +1,17 @@
-#include "ladybug_camera_driver/LadybugCamera.h"
+#include "ladybug_camera_driver/LadybugInterface.h"
 
 #define COLOR_PROCESSING_METHOD LADYBUG_RIGOROUS //LADYBUG_RIGOROUS //LADYBUG_DOWNSAMPLE16  //LADYBUG_RIGOROUS
 #define CONVERT_IMAGE_PFORMAT LADYBUG_BGRU //LADYBUG_BGRU
 
-LadybugCamera::LadybugCamera() {
+LadybugInterface::LadybugInterface() {
   capture_running_ = false;
   camera_connected_ = false;
 }
 
-LadybugCamera::~LadybugCamera() {
-}
 
-void LadybugCamera::connect() {
+void LadybugInterface::Connect() {
 
+  ROS_DEBUG("Connecting to camera");
   // Initialize context.
   error_ = ::ladybugCreateContext(&context_);
 
@@ -20,7 +19,7 @@ void LadybugCamera::connect() {
   error_ = ::ladybugInitializeFromIndex(context_, 0);
 
   // Load config file from the head
-  error_ = ladybugLoadConfig(context_, NULL);
+  error_ = ladybugLoadConfig(context_, nullptr);
 
   // Get camera info
   error_ = ladybugGetCameraInfo(context_, &cam_info_);
@@ -40,7 +39,7 @@ void LadybugCamera::connect() {
   camera_connected_ = true;
 }
 
-void LadybugCamera::disconnect() {
+void LadybugInterface::Disconnect() {
   boost::mutex::scoped_lock scopedLock(mutex_);
 
   capture_running_ = false;
@@ -50,7 +49,7 @@ void LadybugCamera::disconnect() {
   error_ = ::ladybugDestroyContext(&context_);
 }
 
-void LadybugCamera::start() {
+void LadybugInterface::Start() {
   if (!capture_running_) {
     // Start up Camera
 
@@ -63,7 +62,7 @@ void LadybugCamera::start() {
     // Throw error if startup broken
     if (error_ != LADYBUG_OK)
       throw std::runtime_error(
-          "[LadybugCamera:start] Failed to start capture with error: " + std::string(ladybugErrorToString(error_)));
+          "[LadybugInterface:start] Failed to start capture with error: " + std::string(ladybugErrorToString(error_)));
     else {
       ROS_INFO("Ladybug camera successfully started");
       OutputCamInfo();
@@ -85,7 +84,7 @@ void LadybugCamera::start() {
   }
 }
 
-bool LadybugCamera::stop() {
+bool LadybugInterface::Stop() {
   if (capture_running_) {
     // Stop capturing images
     printf("Stopping %s (%u)...\n", cam_info_.pszModelName, cam_info_.serialHead);
@@ -97,7 +96,8 @@ bool LadybugCamera::stop() {
   return false;
 }
 
-void LadybugCamera::grabImage(ladybug_msgs::LadybugTilesPtr &tiles, const std::string &frame_id) {
+void LadybugInterface::GrabImage(ladybug_msgs::LadybugTilesPtr& tiles,
+                              const std::string& frame_id) {
 
   boost::mutex::scoped_lock scopedLock(mutex_);
 
@@ -127,14 +127,14 @@ void LadybugCamera::grabImage(ladybug_msgs::LadybugTilesPtr &tiles, const std::s
     }
   } else if (camera_connected_) {
     throw CameraNotRunningException(
-        "LadybugCamera::grabImage: Camera is currently not running.  Please start the capture.");
+        "LadybugInterface::GrabImage: Camera is currently not running.  Please start the capture.");
   } else {
-    throw std::runtime_error("LadybugCamera not connected!");
+    throw std::runtime_error("LadybugInterface not connected!");
   }
 }
 
-// grabImage function for JPEGs
-void LadybugCamera::grabImageJpeg(std::vector<sensor_msgs::Image::Ptr> &images, const std::string &frame_id) {
+// GrabImage function for JPEGs
+void LadybugInterface::grabImageJpeg(std::vector<sensor_msgs::Image::Ptr> &images, const std::string &frame_id) {
   std::cout << "Trying to grab image--------------------" << std::endl;
   boost::mutex::scoped_lock scopedLock(mutex_);
   images.resize(6);
@@ -198,13 +198,13 @@ void LadybugCamera::grabImageJpeg(std::vector<sensor_msgs::Image::Ptr> &images, 
 
   } else if (camera_connected_) {
     throw CameraNotRunningException(
-        "LadybugCamera::grabImage: Camera is currently not running.  Please start the capture.");
+        "LadybugInterface::GrabImage: Camera is currently not running.  Please start the capture.");
   } else {
-    throw std::runtime_error("LadybugCamera not connected!");
+    throw std::runtime_error("LadybugInterface not connected!");
   }
 }
 
-void LadybugCamera::SetDataCaptureFormat(const std::string &datatype) {
+void LadybugInterface::SetDataCaptureFormat(const std::string &datatype) {
   if (datatype == "raw8") {
     ladybug_data_format_ = LADYBUG_DATAFORMAT_RAW8;
   } else if (datatype == "jpeg8") {
@@ -215,7 +215,7 @@ void LadybugCamera::SetDataCaptureFormat(const std::string &datatype) {
   return;
 }
 
-void LadybugCamera::SetColorProcessingMethod(const std::string &color_processing_method) {
+void LadybugInterface::SetColorProcessingMethod(const std::string &color_processing_method) {
   if (color_processing_method == "disable") {
     ladybug_color_processing_method_ = LADYBUG_DISABLE;
   } else if (color_processing_method == "edge_sensing") {
@@ -240,7 +240,7 @@ void LadybugCamera::SetColorProcessingMethod(const std::string &color_processing
   return;
 }
 
-void LadybugCamera::SetProcessedPixelFormat(const std::string &processed_pixel_format) {
+void LadybugInterface::SetProcessedPixelFormat(const std::string &processed_pixel_format) {
   if (processed_pixel_format == "mono8") {
     ladybug_processed_pixel_format_ = LADYBUG_MONO8;
   } else if (processed_pixel_format == "raw8") {
@@ -259,7 +259,7 @@ void LadybugCamera::SetProcessedPixelFormat(const std::string &processed_pixel_f
   return;
 }
 
-void LadybugCamera::OutputCamInfo() {
+void LadybugInterface::OutputCamInfo() {
   std::cout << "      Serial Number:" << cam_info_.serialBase << std::endl;
   std::cout << "      Serial Head:" << cam_info_.serialHead << std::endl;
   std::cout << "      Color Enabled:" << cam_info_.bIsColourCamera << std::endl;
@@ -274,7 +274,7 @@ void LadybugCamera::OutputCamInfo() {
 }
 
 // Gets byte size of raw & processed pixels
-void LadybugCamera::GetPixelByteSize() {
+void LadybugInterface::GetPixelByteSize() {
   //Get byte size of raw pixel coming off camera
   switch (ladybug_data_format_) {
     case LADYBUG_DATAFORMAT_RAW8:bytes_per_raw_pixel_ = 1;
@@ -306,7 +306,7 @@ void LadybugCamera::GetPixelByteSize() {
 
 // Gets raw_image_ and processed_image_ encodings based on
 // bayer tile format & processed utput pixel format
-void LadybugCamera::GetImageEncodings() {
+void LadybugInterface::GetImageEncodings() {
 
   // Get raw_image_encoding_ based on bayer tile format from camera
   error_ = ladybugGetColorTileFormat(context_, &ladybug_bayer_format_);
@@ -336,7 +336,7 @@ void LadybugCamera::GetImageEncodings() {
 
 }
 
-void LadybugCamera::GetImageSize() {
+void LadybugInterface::GetImageSize() {
   // Get the number of rows & columns for our color processing
   if (COLOR_PROCESSING_METHOD == LADYBUG_DOWNSAMPLE4 ||
       COLOR_PROCESSING_METHOD == LADYBUG_MONO) {
@@ -351,10 +351,10 @@ void LadybugCamera::GetImageSize() {
   }
 }
 
-void LadybugCamera::setNewConfiguration(const ladybug_camera_driver::LadybugConfig &config) {
+void LadybugInterface::SetNewConfiguration(
+    const ladybug_camera_driver::LadybugConfig& config) {
   // Check if camera is connected
-  if (!camera_connected_) {
-    LadybugCamera::connect();
+  if (!camera_connected_) { LadybugInterface::Connect();
   }
 
   // Activate mutex to prevent us from grabbing images during this time
@@ -467,40 +467,40 @@ void LadybugCamera::setNewConfiguration(const ladybug_camera_driver::LadybugConf
   }
   else
   {
-    camera_->setNewConfiguration(config, level);
+    camera_->SetNewConfiguration(config, level);
   } */
-}  // end setNewConfiguration
+}  // end SetNewConfiguration
 
 
-void LadybugCamera::SetGain(const float &gain) {
+void LadybugInterface::SetGain(const float &gain) {
   ladybugSetAbsPropertyEx(context_, LADYBUG_GAIN, false, true, true, gain);
 }
 
-void LadybugCamera::SetAutoExposure(const float &exposure) {
+void LadybugInterface::SetAutoExposure(const float &exposure) {
   ladybugSetAbsProperty(context_, LADYBUG_AUTO_EXPOSURE, exposure);
 }
 
-void LadybugCamera::SetWhiteBalance(const float &white_balance) {
+void LadybugInterface::SetWhiteBalance(const float &white_balance) {
   ladybugSetAbsProperty(context_, LADYBUG_WHITE_BALANCE, white_balance);
 }
 
-void LadybugCamera::SetShutter(const float &shutter) {
+void LadybugInterface::SetShutter(const float &shutter) {
   ladybugSetAbsProperty(context_, LADYBUG_SHUTTER, shutter);
 }
 
-void LadybugCamera::SetFrameRate(const float &frame_rate) {
+void LadybugInterface::SetFrameRate(const float &frame_rate) {
   ladybugSetAbsProperty(context_, LADYBUG_FRAME_RATE, frame_rate);
 }
 
-void LadybugCamera::SetBrightness(const float &brightness) {
+void LadybugInterface::SetBrightness(const float &brightness) {
   ladybugSetAbsProperty(context_, LADYBUG_BRIGHTNESS, brightness);
 }
 
-void LadybugCamera::SetGamma(const float &gamma) {
+void LadybugInterface::SetGamma(const float &gamma) {
   ladybugSetAbsProperty(context_, LADYBUG_GAMMA, gamma);
 }
 
-void LadybugCamera::GetGain() {
+void LadybugInterface::GetGain() {
   float read_gain;
   bool in_one_push_mode, in_auto_mode, is_configurable;
   ladybugGetAbsPropertyEx(context_, LADYBUG_GAIN, &in_one_push_mode, &is_configurable, &in_auto_mode, &read_gain);
@@ -519,7 +519,7 @@ void LadybugCamera::GetGain() {
   std::cout << "Gain State = " << config_.gain_state << ",  Value = " << config_.gain << std::endl;
 }
 
-void LadybugCamera::GetAutoExposure() {
+void LadybugInterface::GetAutoExposure() {
   float read_exposure;
   ladybugGetAbsProperty(context_, LADYBUG_AUTO_EXPOSURE, &read_exposure);
 
@@ -543,7 +543,7 @@ void LadybugCamera::GetAutoExposure() {
     config_.exposure_state = 0;
 }
 
-void LadybugCamera::GetWhiteBalance() {
+void LadybugInterface::GetWhiteBalance() {
   float read_white_balance;
   ladybugGetAbsProperty(context_, LADYBUG_WHITE_BALANCE, &read_white_balance);
 
@@ -560,7 +560,7 @@ void LadybugCamera::GetWhiteBalance() {
   //config_.white_balance = read_white_balance;
 }
 
-void LadybugCamera::GetShutter() {
+void LadybugInterface::GetShutter() {
   float read_shutter;
   ladybugGetAbsProperty(context_, LADYBUG_SHUTTER, &read_shutter);
 
@@ -578,7 +578,7 @@ void LadybugCamera::GetShutter() {
     config_.shutter_state = 0;
 }
 
-void LadybugCamera::GetFrameRate() {
+void LadybugInterface::GetFrameRate() {
   float read_frame_rate;
   ladybugGetAbsProperty(context_, LADYBUG_FRAME_RATE, &read_frame_rate);
 
@@ -596,7 +596,7 @@ void LadybugCamera::GetFrameRate() {
 
 }
 
-void LadybugCamera::GetBrightness() {
+void LadybugInterface::GetBrightness() {
   float read_brightness;
   ladybugGetAbsProperty(context_, LADYBUG_BRIGHTNESS, &read_brightness);
 
@@ -613,7 +613,7 @@ void LadybugCamera::GetBrightness() {
   config_.brightness = read_brightness;
 }
 
-void LadybugCamera::GetGamma() {
+void LadybugInterface::GetGamma() {
   float read_gamma;
   ladybugGetAbsProperty(context_, LADYBUG_GAMMA, &read_gamma);
   bool in_one_push_mode, in_auto_mode, is_configurable;

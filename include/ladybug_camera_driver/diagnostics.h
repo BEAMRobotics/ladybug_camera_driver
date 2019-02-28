@@ -41,7 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef LADYBUG_CAMERA_DRIVER_DIAGNOSTICS_H
 #define LADYBUG_CAMERA_DRIVER_DIAGNOSTICS_H
 
-#include "ladybug_camera_driver/LadybugCamera.h"
+#include "ladybug_camera_driver/LadybugRectified.h"
 #include "ladybug_camera_driver/diagnostics.h"
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
@@ -66,7 +66,7 @@ class DiagnosticsManager {
    * \param spinnaker the SpinnakerCamera object used for getting the parameters
    * from the spinnaker API
    */
-  void processDiagnostics(LadybugCamera *ladybug);
+  void processDiagnostics(LadybugInterface *ladybug);
 
   /*!
    * \brief Add a diagnostic with name only (no warning checks)

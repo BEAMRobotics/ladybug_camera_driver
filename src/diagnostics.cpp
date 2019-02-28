@@ -98,7 +98,7 @@ diagnostic_msgs::DiagnosticStatus DiagnosticsManager::getDiagStatus(const diagno
   return diag_status;
 } */
 
-void DiagnosticsManager::processDiagnostics(LadybugCamera *ladybug) {
+void DiagnosticsManager::processDiagnostics(LadybugInterface *ladybug) {
   diagnostic_msgs::DiagnosticArray diag_array;
 
   // Manufacturer Info
