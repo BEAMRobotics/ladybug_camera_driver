@@ -41,20 +41,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef LADYBUG_CAMERA_DRIVER_DIAGNOSTICS_H
 #define LADYBUG_CAMERA_DRIVER_DIAGNOSTICS_H
 
-#include "ladybug_camera_driver/LadybugCamera.h"
+#include "ladybug_camera_driver/LadybugRectified.h"
 #include "ladybug_camera_driver/diagnostics.h"
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <ros/ros.h>
 
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace ladybug_camera_driver {
 class DiagnosticsManager {
- public:
-  DiagnosticsManager(const std::string name, const std::string serial, std::shared_ptr<ros::Publisher> const &pub);
+public:
+  DiagnosticsManager(const std::string name, const std::string serial,
+                     std::shared_ptr<ros::Publisher> const& pub);
   ~DiagnosticsManager();
 
   /*!
@@ -66,7 +67,7 @@ class DiagnosticsManager {
    * \param spinnaker the SpinnakerCamera object used for getting the parameters
    * from the spinnaker API
    */
-  void processDiagnostics(LadybugCamera *ladybug);
+  void processDiagnostics(LadybugInterface* ladybug);
 
   /*!
    * \brief Add a diagnostic with name only (no warning checks)
@@ -76,8 +77,8 @@ class DiagnosticsManager {
    * User must specify the type they are getting
    * \param name is the name of the parameter as writting in the User Manual
    */
-/*   template <typename T>
-  void addDiagnostic(const Spinnaker::GenICam::gcstring name); */
+  /*   template <typename T>
+    void addDiagnostic(const Spinnaker::GenICam::gcstring name); */
 
   /*!
    * \brief Add a diagnostic with warning checks
@@ -87,22 +88,24 @@ class DiagnosticsManager {
    * of these ranges will be considered an error.
    * \param name is the name of the parameter as writting in the User Manual
    */
-/*   void addDiagnostic(const Spinnaker::GenICam::gcstring name, bool check_ranges = false,
-                     std::pair<int, int> operational = std::make_pair(0, 0), int lower_bound = 0, int upper_bound = 0);
-  void addDiagnostic(const Spinnaker::GenICam::gcstring name, bool check_ranges = false,
-                     std::pair<float, float> operational = std::make_pair(0.0, 0.0), float lower_bound = 0,
-                     float upper_bound = 0); */
+  /*   void addDiagnostic(const Spinnaker::GenICam::gcstring name, bool
+    check_ranges = false, std::pair<int, int> operational = std::make_pair(0,
+    0), int lower_bound = 0, int upper_bound = 0); void addDiagnostic(const
+    Spinnaker::GenICam::gcstring name, bool check_ranges = false,
+                       std::pair<float, float> operational = std::make_pair(0.0,
+    0.0), float lower_bound = 0, float upper_bound = 0); */
 
- private:
+private:
   /*
    * diagnostic_params is aData Structure to represent a parameter and its
    * bounds
    */
-  template<typename T>
+  template <typename T>
   struct diagnostic_params {
-    //Spinnaker::GenICam::gcstring parameter_name;  // This should be the same as written in the User Manual
+    // Spinnaker::GenICam::gcstring parameter_name;  // This should be the same
+    // as written in the User Manual
     bool check_ranges;
-    std::pair<T, T> operational_range;  // Normal operatinal range
+    std::pair<T, T> operational_range; // Normal operatinal range
     T warn_range_lower;
     T warn_range_upper;
   };
@@ -117,8 +120,9 @@ class DiagnosticsManager {
    * \param value is the current value of the parameter requested from the
    * device
    */
-  template<typename T>
-  diagnostic_msgs::DiagnosticStatus getDiagStatus(const diagnostic_params<T> &param, const T value);
+  template <typename T>
+  diagnostic_msgs::DiagnosticStatus
+      getDiagStatus(const diagnostic_params<T>& param, const T value);
 
   // constuctor parameters
   std::string camera_name_;
@@ -137,6 +141,6 @@ class DiagnosticsManager {
       };
   // clang-format on
 };
-}  // namespace ladybug_camera_driver
+} // namespace ladybug_camera_driver
 
-#endif  // LADYBUG_CAMERA_DRIVER_DIAGNOSTICS_H
+#endif // LADYBUG_CAMERA_DRIVER_DIAGNOSTICS_H

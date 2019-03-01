@@ -1,27 +1,24 @@
 <launch>
 
-    <arg name="camera_name" default=""/>
-    <arg name="calibrated" default="0"/>
+  <arg name="manager" default="ladybug_nodelet_manager"/>
+  <node pkg="nodelet" type="nodelet" name="ladybug_nodelet_manager" args="manager" output="screen"/>
 
-    <arg name="manager" default="camera_nodelet_manager"/>
-    <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" output="screen"/>
+  <node pkg="nodelet" type="nodelet" name="camera_nodelet"
+        args="load ladybug_camera_driver/LadybugCameraNodelet ladybug_nodelet_manager" output="screen">
+    <param name="frame_id" value="ladybug_link"/>
+    <param name="frame_rate" value="15"/>
+    <param name="camera_mode" value="raw" /> <!-- raw or rectified -->
+    <param name="enable_debug_logging" value="true" />
+  </node>
 
-    <node pkg="nodelet" type="nodelet" name="camera_nodelet"
-          args="load ladybug_camera_driver/LadybugCameraNodelet camera_nodelet_manager" output="screen">
-        <param name="frame_id" value="ladybug_link"/>
-        <param name="frame_rate" value="15"/>
-        <param name="publish_raw_images" value="true"/>
-    </node>
+  <node pkg="nodelet" type="nodelet" name="debayer_nodelet"
+        args="load ladybug_debayer/DebayerNodelet $(arg manager)" output="screen">
+    <param name="image_tiles_topic_name" value="/image_tiles"/>
+    <param name="debayered_topic_prefix" value="/ladybug/camera_"/>
+    <param name="debayered_topic_suffix" value="/image_colored"/>
+    <param name="debayering_method_name" value="DC1394_BAYER_METHOD_DOWNSAMPLE"/>
+  </node>
 
-
-    <node pkg="nodelet" type="nodelet" name="debayer_nodelet"
-          args="load ladybug_debayer/DebayerNodelet $(arg manager)" output="screen">
-        <param name="image_tiles_topic_name" value="/image_tiles"/>
-        <param name="debayered_topic_prefix" value="/ladybug/camera_"/>
-        <param name="debayered_topic_suffix" value="/image_colored"/>
-        <param name="debayering_method_name" value="DC1394_BAYER_METHOD_DOWNSAMPLE"/>
-    </node>
-
-    <node name="image_throttler" type="throttle" pkg="topic_tools" args="messages /image_tiles 0.1 /image_tiles/throttled" />
+  <node name="image_throttler" type="throttle" pkg="topic_tools" args="messages /image_tiles 0.1 /image_tiles/throttled" />
 
 </launch>
