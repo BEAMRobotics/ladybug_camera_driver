@@ -11,7 +11,7 @@ LadybugInterface::LadybugInterface() {
 
 void LadybugInterface::Connect() {
 
-  ROS_DEBUG("Connecting to camera");
+  ROS_DEBUG("[Interface] Connecting to camera ");
   // Initialize context.
   error_ = ::ladybugCreateContext(&context_);
 

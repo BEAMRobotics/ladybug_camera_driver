@@ -8,6 +8,8 @@ LadybugRaw::LadybugRaw() {
 LadybugRaw::~LadybugRaw() {}
 
 void LadybugRaw::Initialize() {
+
+  ROS_DEBUG("[ladybugRaw] Initializing camera");
   // Set color processing method
   error_ = ::ladybugSetColorProcessingMethod(
       context_, LadybugColorProcessingMethod::LADYBUG_DOWNSAMPLE4);
@@ -24,7 +26,6 @@ void LadybugRaw::Initialize() {
   // std::cout << "[ladybugSetGrabTimeout] Done: " <<
   // ladybugErrorToString(error_) << std::endl;
 }
-
 
 void LadybugRaw::GrabImage(ladybug_msgs::LadybugTilesPtr& tiles,
                               const std::string& frame_id) {
