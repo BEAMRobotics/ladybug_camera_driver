@@ -16,7 +16,9 @@ The ladybug_camera_driver package has been tested under [ROS] Kinetic and Ubuntu
 
 [![Build Status](https://travis-ci.com/BEAMRobotics/ladybug_camera_driver.svg?token=xsJrkSdtugQUZAqp6xuh&branch=master)](https://travis-ci.com/BEAMRobotics/ladybug_camera_driver)
 
-![Ladybug Camera](doc/ld5-family3.jpg)
+<p align="center">
+    <img src ="https://i.imgur.com/dAH1m3e.png" width="500"/>
+</p>
 
 ## Usage
 

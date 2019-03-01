@@ -31,13 +31,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ladybug_camera_driver/diagnostics.h"
 
 namespace ladybug_camera_driver {
-DiagnosticsManager::DiagnosticsManager(const std::string name, const std::string serial,
-                                       std::shared_ptr<ros::Publisher> const &pub)
-    : camera_name_(name), serial_number_(serial), diagnostics_pub_(pub) {
-}
+DiagnosticsManager::DiagnosticsManager(
+    const std::string name, const std::string serial,
+    std::shared_ptr<ros::Publisher> const& pub)
+    : camera_name_(name), serial_number_(serial), diagnostics_pub_(pub) {}
 
-DiagnosticsManager::~DiagnosticsManager() {
-}
+DiagnosticsManager::~DiagnosticsManager() {}
 
 /* template <typename T>
 void DiagnosticsManager::addDiagnostic(const Spinnaker::GenICam::gcstring name)
@@ -47,27 +46,32 @@ void DiagnosticsManager::addDiagnostic(const Spinnaker::GenICam::gcstring name)
   // Call the overloaded function (use the pair to determine which one)
   addDiagnostic(name, false, std::make_pair(first, second));
 } */
-/* 
-template void DiagnosticsManager::addDiagnostic<int>(const Spinnaker::GenICam::gcstring name);
+/*
+template void DiagnosticsManager::addDiagnostic<int>(const
+Spinnaker::GenICam::gcstring name);
 
-template void DiagnosticsManager::addDiagnostic<float>(const Spinnaker::GenICam::gcstring name);
+template void DiagnosticsManager::addDiagnostic<float>(const
+Spinnaker::GenICam::gcstring name);
 
-void DiagnosticsManager::addDiagnostic(const Spinnaker::GenICam::gcstring name, bool check_ranges,
-                                       std::pair<int, int> operational, int lower_bound, int upper_bound)
+void DiagnosticsManager::addDiagnostic(const Spinnaker::GenICam::gcstring name,
+bool check_ranges, std::pair<int, int> operational, int lower_bound, int
+upper_bound)
 {
-  diagnostic_params<int> param{ name, check_ranges, operational, lower_bound, upper_bound };
-  integer_params_.push_back(param);
+  diagnostic_params<int> param{ name, check_ranges, operational, lower_bound,
+upper_bound }; integer_params_.push_back(param);
 }
 
-void DiagnosticsManager::addDiagnostic(const Spinnaker::GenICam::gcstring name, bool check_ranges,
-                                       std::pair<float, float> operational, float lower_bound, float upper_bound)
+void DiagnosticsManager::addDiagnostic(const Spinnaker::GenICam::gcstring name,
+bool check_ranges, std::pair<float, float> operational, float lower_bound, float
+upper_bound)
 {
-  diagnostic_params<float> param{ name, check_ranges, operational, lower_bound, upper_bound };
-  float_params_.push_back(param);
+  diagnostic_params<float> param{ name, check_ranges, operational, lower_bound,
+upper_bound }; float_params_.push_back(param);
 }
  */
 /* template <typename T>
-diagnostic_msgs::DiagnosticStatus DiagnosticsManager::getDiagStatus(const diagnostic_params<T>& param, const T value)
+diagnostic_msgs::DiagnosticStatus DiagnosticsManager::getDiagStatus(const
+diagnostic_params<T>& param, const T value)
 {
   diagnostic_msgs::KeyValue kv;
   kv.key = param.parameter_name;
@@ -75,11 +79,13 @@ diagnostic_msgs::DiagnosticStatus DiagnosticsManager::getDiagStatus(const diagno
 
   diagnostic_msgs::DiagnosticStatus diag_status;
   diag_status.values.push_back(kv);
-  diag_status.name = "Spinnaker " + Spinnaker::GenICam::gcstring(camera_name_.c_str()) + " " + param.parameter_name;
+  diag_status.name = "Spinnaker " +
+Spinnaker::GenICam::gcstring(camera_name_.c_str()) + " " + param.parameter_name;
   diag_status.hardware_id = serial_number_;
 
   // Determine status level
-  if (!param.check_ranges || (value > param.operational_range.first && value <= param.operational_range.second))
+  if (!param.check_ranges || (value > param.operational_range.first && value <=
+param.operational_range.second))
   {
     diag_status.level = 0;
     diag_status.message = "OK";
@@ -98,7 +104,7 @@ diagnostic_msgs::DiagnosticStatus DiagnosticsManager::getDiagStatus(const diagno
   return diag_status;
 } */
 
-void DiagnosticsManager::processDiagnostics(LadybugInterface *ladybug) {
+void DiagnosticsManager::processDiagnostics(LadybugInterface* ladybug) {
   diagnostic_msgs::DiagnosticArray diag_array;
 
   // Manufacturer Info
@@ -108,7 +114,8 @@ void DiagnosticsManager::processDiagnostics(LadybugInterface *ladybug) {
   /*
   for (const std::string param : manufacturer_params_)
   {
-    Spinnaker::GenApi::CStringPtr string_ptr = static_cast<Spinnaker::GenApi::CStringPtr>(
+    Spinnaker::GenApi::CStringPtr string_ptr =
+  static_cast<Spinnaker::GenApi::CStringPtr>(
         spinnaker->readProperty(Spinnaker::GenICam::gcstring(param.c_str())));
 
     diagnostic_msgs::KeyValue kv;
@@ -127,8 +134,8 @@ void DiagnosticsManager::processDiagnostics(LadybugInterface *ladybug) {
 
     float float_value = float_ptr->GetValue(true);
 
-    diagnostic_msgs::DiagnosticStatus diag_status = getDiagStatus(param, float_value);
-    diag_array.status.push_back(diag_status);
+    diagnostic_msgs::DiagnosticStatus diag_status = getDiagStatus(param,
+  float_value); diag_array.status.push_back(diag_status);
   }
 
   // Int based parameters
@@ -138,10 +145,10 @@ void DiagnosticsManager::processDiagnostics(LadybugInterface *ladybug) {
         static_cast<Spinnaker::GenApi::CIntegerPtr>(spinnaker->readProperty(param.parameter_name));
 
     int int_value = integer_ptr->GetValue(true);
-    diagnostic_msgs::DiagnosticStatus diag_status = getDiagStatus(param, int_value);
-    diag_array.status.push_back(diag_status);
+    diagnostic_msgs::DiagnosticStatus diag_status = getDiagStatus(param,
+  int_value); diag_array.status.push_back(diag_status);
   }
 
   diagnostics_pub_->publish(diag_array); */
 }
-}  // namespace ladybug_camera_driver
+} // namespace ladybug_camera_driver
