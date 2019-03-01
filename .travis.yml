@@ -124,8 +124,6 @@ script:
   - |
     if [[ "$ROS_DISTRO" == "kinetic" ]]; then
       source /opt/ros/$ROS_DISTRO/setup.bash
-      cd ~/catkin_ws/src/m3d_aggregator
-      printf "\nremove_definitions(-DDISABLE_LIBUSB-1.0)\n" >> CMakeLists.txt
       cd ~/catkin_ws
       catkin_make
       # Run the tests, ensuring the path is set correctly.
