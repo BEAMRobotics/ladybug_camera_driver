@@ -2,16 +2,16 @@
 
 #include "ladybug_camera_driver/LadybugInterface.h"
 
-class LadybugRaw : public LadybugInterface{
- public:
+/**
+ * @brief Implementation of LadybugInterface for using camera in raw mode (i.e.,
+ * publishing raw bayer tiles)
+ */
+class LadybugRaw : public LadybugInterface {
+public:
+  ~LadybugRaw() = default;
 
-  LadybugRaw();
-
-  ~LadybugRaw();
-
-  void Initialize();
+  void Initialize() override;
 
   void GrabImage(ladybug_msgs::LadybugTilesPtr& tiles,
-                 const std::string& frame_id);
+                 const std::string& frame_id) override;
 };
-
