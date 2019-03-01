@@ -2,13 +2,19 @@ sudo: required
 cache:
   - apt
 
-# Build all valid Ubuntu/ROS combinations available on Travis VMs.
+# Specify what combinations of Ubuntu/ROS we want to build
+# Limited to what is available on Travis VMs.
 language: generic
 matrix:
+  allow_failures:
+    - env: CHECK_COMMIT_FORMAT=ON
   include:
     - name: "Xenial kinetic"
       dist: xenial
       env: ROS_DISTRO=kinetic
+    # Check for proper clang formatting in the pull request.
+    - env: CHECK_FORMAT=ON
+      dist: xenial
 
 # Configuration variables. All variables are global now, but this can be used to
 # trigger a build matrix for different ROS distributions if desired.
@@ -22,48 +28,89 @@ env:
     # Set the python path manually to include /usr/-/python2.7/dist-packages
     # as this is where apt-get installs python packages.
     - PYTHONPATH=$PYTHONPATH:/usr/lib/python2.7/dist-packages:/usr/local/lib/python2.7/dist-packages
-
 ################################################################################
 
-# Install system dependencies, namely a very barebones ROS setup.
+# Install barebones ROS setup.
 before_install:
-  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
-  - sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
-  - sudo apt-get update -qq
-  - sudo apt-get install dpkg
-  - sudo apt-get install libdc1394-*
-  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-ros-base
-  - source /opt/ros/$ROS_DISTRO/setup.bash
-  # Prepare rosdep to install dependencies.
-  - sudo rosdep init
-  - rosdep update
-
+  #- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -q
+  - |
+    if [[ "$ROS_DISTRO" == "kinetic" ]]; then
+      # Install the clang format diff tool, but only for pull requests.
+      sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
+      sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+      sudo apt-get update -qq
+      sudo apt-get install dpkg
+      sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-ros-base
+      source /opt/ros/$ROS_DISTRO/setup.bash
+      # Prepare rosdep to install dependencies.
+      sudo rosdep init
+      rosdep update
+    fi
+  - |
+    if [[ "$CHECK_FORMAT" == "ON" && "$TRAVIS_PULL_REQUEST" != "false" ]]; then
+      # Install the clang format diff tool, but only for pull requests.
+      echo "Installing clang format diff tool"
+      mkdir -p scripts
+      curl -L http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_600/final/tools/clang-format/clang-format-diff.py -o scripts/clang-format-diff.py
+      wget -O scripts/check_code_format.sh https://www.dropbox.com/s/r3bb5z3fakfnnxo/check_code_format.sh
+      sudo chmod +x scripts/check_code_format.sh
+    fi
+  - sudo apt-get remove clang-format-*
+  - sudo apt-get install clang-format-6.0
+  - sudo ln -s /usr/bin/clang-format-6.0 /usr/bin/clang-format
+  - clang-format --version
+  - echo $TRAVIS_COMMIT
+  - echo $TRAVIS_TAG
+  - echo $TRAVIS_BRANCH
+  - echo $TRAVIS_BUILD_NUMBER
+  - echo $TRAVIS_REPO_SLUG
+  - echo $CHECK_FORMAT
+  - echo $TRAVIS_PULL_REQUEST
+  - sudo pip install --upgrade cmake
+  - cmake -version
 # Create a catkin workspace with the package under integration.
 install:
-  - mkdir -p ~/catkin_ws/src
-  - cd ~/catkin_ws/src
-  - catkin_init_workspace
-  # Create the devel/setup.bash (run catkin_make with an empty workspace) and
-  # source it to set the path variables.
-  - cd ~/catkin_ws
-  - catkin_make
-  - source devel/setup.bash
-  # Add the package under integration to the workspace using a symlink.
-  - cd ~/catkin_ws/src
-  - ln -s $CI_SOURCE_PATH .
-
+  - |
+    if [[ "$ROS_DISTRO" == "kinetic" ]]; then
+      mkdir -p ~/catkin_ws/src
+      cd ~/catkin_ws/src
+      catkin_init_workspace
+      # Create the devel/setup.bash (run catkin_make with an empty workspace) and
+      # source it to set the path variables.
+      cd ~/catkin_ws
+      catkin_make
+      source devel/setup.bash
+      # Add the package under integration to the workspace using a symlink.
+      cd ~/catkin_ws/src
+      ln -s $CI_SOURCE_PATH .
+    fi
+  - |
+    if [[ "$CHECK_FORMAT" == "ON" ]]; then
+      echo "Clang-format check = ON"
+      if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then
+        mkdir -p ~/catkin_ws/src
+        cd ~/catkin_ws/src
+        ln -s $CI_SOURCE_PATH .
+      fi
+    fi
+  - cd $CI_SOURCE_PATH
 # Install all dependencies, using wstool first and rosdep second.
 # wstool looks for a ROSINSTALL_FILE defined in the environment variables.
 before_script:
-  # source dependencies: install using wstool.
-  - cd ~/catkin_ws/src
-  - git clone git@github.com:BEAMRobotics/ladybug_msgs.git
-  - wstool init
-  - if [[ -f $ROSINSTALL_FILE ]] ; then wstool merge $ROSINSTALL_FILE ; fi
-  - wstool up
-  # package depdencies: install using rosdep.
-  - cd ~/catkin_ws
-  - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+  - |
+    if [[ "$ROS_DISTRO" == "kinetic" ]]; then
+      # source dependencies: install using wstool.
+      cd ~/catkin_ws/src
+      git clone git@github.com:BEAMRobotics/ladybug_msgs.git
+      cd ~/catkin_ws/src
+      wstool init
+      if [[ -f $ROSINSTALL_FILE ]]; then wstool merge $ROSINSTALL_FILE ; fi
+      wstool up
+      # package depdencies: install using rosdep.
+      cd ~/catkin_ws
+      rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+    fi
 
 # Compile and test (mark the build as failed if any step fails). If the
 # CATKIN_OPTIONS file exists, use it as an argument to catkin_make, for example
@@ -74,9 +121,28 @@ before_script:
 # fails. Running `catkin_test_results` aggregates all the results and returns
 # non-zero when a test fails (which notifies Travis the build failed).
 script:
-  - source /opt/ros/$ROS_DISTRO/setup.bash
-  - cd ~/catkin_ws
-  - catkin_make $( [ -f $CATKIN_OPTIONS ] && cat $CATKIN_OPTIONS )
-  # Run the tests, ensuring the path is set correctly.
-  - source devel/setup.bash
-  - catkin_make run_tests && catkin_test_results
+  - |
+    if [[ "$ROS_DISTRO" == "kinetic" ]]; then
+      source /opt/ros/$ROS_DISTRO/setup.bash
+      cd ~/catkin_ws/src/m3d_aggregator
+      printf "\nremove_definitions(-DDISABLE_LIBUSB-1.0)\n" >> CMakeLists.txt
+      cd ~/catkin_ws
+      catkin_make
+      # Run the tests, ensuring the path is set correctly.
+      source devel/setup.bash
+    #      catkin_make run_tests && catkin_test_results
+    fi
+  - |
+    if [[ "$CHECK_FORMAT" == "ON" ]]; then
+      echo "Clang-format check = ON"
+      if [[ "$TRAVIS_PULL_REQUEST" != "false" ]]; then
+        echo "TRAVIS_PULL_REQUEST = TRUE"
+        # Run the clang format check only for pull request builds because the
+        # master branch is needed to do the git diff.
+        echo "Checking clang-format between TRAVIS_BRANCH=$TRAVIS_BRANCH and TRAVIS_PULL_REQUEST_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH"
+        sudo chmod +x scripts/check_code_format.sh
+        sudo sh scripts/check_code_format.sh
+      else
+        echo "Skipping clang-format check since this is not a pull request."
+      fi
+    fi
